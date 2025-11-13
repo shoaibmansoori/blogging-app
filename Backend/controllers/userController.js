@@ -7,7 +7,6 @@ async function createUser(req, res) {
     const { username, email, password } = req.body;
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      console.log("hashedPassword",hashedPassword)
       const user = new User({ username, email, password: hashedPassword });
       await user.save();
       const userData = await User.findOne({ email });
@@ -15,7 +14,7 @@ async function createUser(req, res) {
 
   
       const token = jwt.sign({ id: userData._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-      res.status(201).json({ token});
+      res.status(201).json({userData:userData,token:token});
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -33,7 +32,7 @@ async function createUser(req, res) {
         return res.status(400).json({ message: 'Invalid credentials' });
       }
   
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ id: user._id,email:email }, process.env.JWT_SECRET, { expiresIn: '1d' });
       res.status(200).json({ token });
     } catch (error) {
       res.status(500).json({ error: error.message });
